@@ -1,1 +1,10 @@
 Tool for automatically converting ruby tests to ruby specs
+
+This script works only with ruby 1.8.7.
+The part of using Array should be modified.
+
+Known issues
+* Cannot convert mailer test.
+* No support for assert_difference.
+* Not implemented =~ -> match, !~ -> not match.
+* Not implemented < etc. (Need to check be_true in generated specs.)
