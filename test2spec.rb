@@ -91,6 +91,9 @@ def test2rspec(src, options)
     data.gsub!(/assert_select (.+),\s*(\d+)/) { count = $2 ; "page.should have_xpath(\"//#{$1.gsub(/^['"]/,'').gsub(/['"]$/,'').gsub('[','[@').gsub('=','=\'').gsub(']','\']')}\", :count => #{count})" }
     data.gsub!(/assert_select (.+)/) { "page.should have_xpath(\"//#{$1.gsub(/^['"]/,'').gsub(/['"]$/,'').gsub('[','[@').gsub('=','=\'').gsub(']','\']')}\")" }
 
+    # Others
+    data.gsub! /assert_confirmation\((.+)\)/, 'page.should have_confirmation(\1).and_click_ok'
+
     # Capybara
     data.gsub! /assert page\.has_(\w+)\?/, 'page.should have_\1'
     #TODO automatically convert assert @xxx.verb? to @xxx.should be_verb
