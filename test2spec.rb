@@ -167,7 +167,7 @@ Dir.glob(File.join(PROJECT_ROOT, 'test') + "/*").each do |item|
       # Add fixtures all for integration test
       options[:fixtures] = true if subitem.match(%r{/integration/([^/]+)_test\.rb})
 
-      if source_name =~ /_test\.rb$/
+      if source_name =~ /_test\.rb$/ or source_name =~ /custom_dsl\.rb$/
         out_filepath.gsub!(%r{_test\.rb$}, '_spec.rb')
         print_message('Rewriting', source_name, out_filepath)
         data = File.open(subitem).read
