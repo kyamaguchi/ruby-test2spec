@@ -52,14 +52,14 @@ def test2rspec(src, options)
     data.gsub!(/class (.*)Test < ActionController::IntegrationTest/) { "describe \"#{$1}\" do" + (options[:fixtures] ? "\n  fixtures :all" : '') }
 
     ### shoulda matchers
-    while(m = data.match /(^\s+)should(_not)?[ _](belong_to|have_one|have_many|allow_mass_assignment_of|validate_presence_of) (:.+)/)
+    while(m = data.match /(^\s+)should(_not)?[ _](belong_to|have_one|have_many|allow_mass_assignment_of|validate_presence_of|validate_uniqueness_of|respond_with|render_template) (:.+)/)
       replace = []
       m[4].split(/,\s+/).each do |key|
         replace.push "#{m[1]}it { should#{m[2]} #{m[3]} #{key} }"
       end
       data.gsub! m[0], replace.join("\n")
     end
-    data.gsub! /(^\s+)should(_not)?[ _](allow_value)(.+)/, '\1it { should\2 \3\4 }'
+    data.gsub! /(^\s+)should(_not)?[ _](allow_value|set_the_flash|assign_to|redirect_to)(.+)/, '\1it { should\2 \3\4 }'
 
     ### setup and teardown
     data.gsub! /setup do/, 'before :each do'
@@ -87,6 +87,7 @@ def test2rspec(src, options)
     data.gsub! /assert_template (.+)/, 'response.should render_template(\1)'
     data.gsub! /assert_routing (.+),\s*\{(.+)\}/, '{ :get => \1 }.should route_to(\2)'
 
+    data.gsub!(/assert_select (.+),\s*(\/[^\/]+\/)/) { text = $2 ; "page.should have_xpath(\"//#{$1.gsub(/^['"]/,'').gsub(/['"]$/,'').gsub('[','[@').gsub('=','=\'').gsub(']','\']')}\", :text => #{text})" }
     data.gsub!(/assert_select (.+),\s*(\d+)/) { count = $2 ; "page.should have_xpath(\"//#{$1.gsub(/^['"]/,'').gsub(/['"]$/,'').gsub('[','[@').gsub('=','=\'').gsub(']','\']')}\", :count => #{count})" }
     data.gsub!(/assert_select (.+)/) { "page.should have_xpath(\"//#{$1.gsub(/^['"]/,'').gsub(/['"]$/,'').gsub('[','[@').gsub('=','=\'').gsub(']','\']')}\")" }
 
@@ -101,6 +102,7 @@ def test2rspec(src, options)
 
     data.gsub! /assert_equal ((?:\[.*?\]|\(.*?\)|[^,\(\[])+), (\S+)( (?:if|unless) .*)?/, '\2.should == \1\3'
     data.gsub! /assert_not_equal ((?:\[.*?\]|\(.*?\)|[^,\(\[])+), (\S+)( (?:if|unless) .*)?/, '\2.should_not == \1\3'
+    data.gsub! /assert_match ((?:\[.*?\]|\(.*?\)|[^,\(\[])+), (\S+)( (?:if|unless) .*)?/, '\2.should match \1\3'
 
     data.gsub! /assert(_not)?_nil (.*)/, '\2.should\1 be_nil'
 
@@ -110,6 +112,7 @@ def test2rspec(src, options)
     data.chomp!.concat(condition+"\n") if condition
 
     data.gsub! /(\s+)should "/, '\1it "should '
+    data.gsub! /(\s+)should '/, '\1it \'should '
 
     # Deal with Mocha -> Rspec Mocks
     # data.gsub! /\.expects\(/, '.should_receive('
