@@ -37,7 +37,12 @@ end
 
 def test2rspec(src, options)
   result = []
-  Array(src).each do |data|
+
+  if RUBY_VERSION >= "1.9"
+    src.split(/(\n|\r|\r\n)/)
+  else
+    Array(src)
+  end.each do |data|
     ### Skip blank lines
     result.push("\n") && next if data =~ /^\s*$/
 
